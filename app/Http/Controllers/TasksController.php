@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TaskRequest;
 use Illuminate\Http\Request;
 use stdClass;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -9,28 +10,30 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class TasksController extends Controller
 {
     //
+    protected $slackUsername = "__localdev";
+
     public function taskOne(): JsonResponse
     {
         $data = new stdClass;
-        $data->slackUsername = '__localdev';
+        $data->slackUsername = $this->slackUsername;
         $data->backend = true;
         $data->age = 24;
         $data->bio = 'My name is Michael, and I am a backend developer';
         return response()->json($data);
     }
 
-    public function taskTwo(Request $request): JsonResponse
+    /**
+     * A function to perform basic arithmetic operations
+     * @return JsonResponse
+     */
+    public function taskTwo(TaskRequest $request): JsonResponse
     {
-        $this->validate($request, [
-            "operation_type"=>'required|in:addition,subtraction,multiplication',
-            "x"=>'integer|required',
-            "y"=>'integer|required',
-        ]);
+        $request = $request->validated();
 
-        $_x = $request->x;
-        $_y = $request->y;
+        $_x = $request["x"];
+        $_y = $request["y"];
 
-        switch ($request->operation_type) {
+        switch ($request["operation_type"]) {
             case 'addition':
                 $result = (int) $_x + $_y;
                 break;
@@ -47,9 +50,9 @@ class TasksController extends Controller
         }
 
         $data = new stdClass;
-        $data->slackUsername = '__localdev';
+        $data->slackUsername = $this->slackUsername;
         $data->result = $result;
-        $data->operation_type = $request->operation_type;
+        $data->operation_type = $request["operation_type"];
         return response()->json($data);
     }
 }
